@@ -1,3 +1,3 @@
-# r0kit's site
+# Hacking Topics
 
 * [Web Hacking](./web/web.html)

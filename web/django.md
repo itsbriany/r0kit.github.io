@@ -1,0 +1,71 @@
+# Security issues in Django apps
+
+## Before you start
+
+* Django prefers using models rather than SQL queries to access its database. This means that it will *generally* be less prone to SQL injection attacks.
+* Django keeps its middleware configurations in the `settings.py` file. It's `SECRET_KEY` variable is also stored there and is a good target to attack to fully compromise the app.
+* Django is written in python, so code injection attempts should be in python and/or bash.
+
+## SQL Injection
+
+* Custom SQL queries could be prone to this if they are not parameterized. For the most part, developers will use the Django models to indirectly (and securely) access the database.
+* You can search for `curs.execute()` queries in application code during white box testing.
+
+## Broken Authentication
+
+* Sometimes, developers implement a blacklist of attributes for their **User** model.  Since their custom **User** model inherits from the Django base model, you might be able to create a user with the `is_staff` and `is_superuser` attributes. 
+    * This can be prevented with the use of a whitelist of permitted attributes.
+* Avoid using `CookieStorage` for user session storage because this opens up possibilities for attackers to steal the cookie and then authenticate. It also allows attackers to analyze cookies and session state information opening up the server to session prediction attacks and possibly identifying that the session is a serialzied object, giving more context for attacking the app's deserialization mechanism.
+    * This can be prevented by keeping all session state on the server.
+* On the prevoious note, avoid using the `PickleSerializer` to serialize session information because if an attacker discovers the app's `SECRET_KEY` variable, they will have remote code execution.
+    * More information on how to exploit that [here](https://systemoverlord.com/2014/04/14/plaidctf-2014-reekeeeee/)
+
+## Broken Authorization
+
+* Sometimes, you will be able to attempt actions that you were supposedly not allowed to do.
+    * If any database change will be made, always be sure to check that the user is authorized before doing so.
+    * Always perform an authorized check before any data is returned back to the user.
+        * That said, you might be able to find access data implicitly through other means to leak information you were not supposed to see.
+
+## XSS
+
+* Django renders data back to users via Jinja2 template files. If you see the `safe`, `var`, or `escape` filters in variable interpolation, then browsers should be able to render XSS attacks there.
+    * You can add further defenses against XSS by adding the `X-XSS-Protection` header in your responses which can be set with the django `SECURE_BROWSER_XSS_FILTER` variable.
+
+## IDOR
+
+* Sometimes, you will find some endpoints/pages that do not require authorization, so you might be able create, update, edit, or delete resources by changing parameter or url values.
+    * If any database change will be made, always be sure to check that the user is authorized before doing so.
+
+## Vulnerable Components
+
+* In web apps, developers might use front-end web frameworks like React and Angular. If these components are outdated, you might be able to exploit some CVEs in them! Even better, check that the Django app itself is outdated!
+
+## Misconfigurations
+
+* Always turn `DEBUG` mode off.
+* Don't use `CookieStorage` as the default session store.
+* Out of the box, the above two configurations are the default in django.
+
+## Weak Cryptography
+
+* Prefer using `bcrypt` to store password hashes because it is computationally and memory intensive, making it difficult for an attacker to brute force a hash if they get a dump of the database.
+
+## CSRF
+
+* Check for any GET requests that act as write operations. These should be vulnerable to CSRF!
+* Any code that has the `@csrf_exempt` tag on will be vulnerable to CSRF. Remove those annotations and set the `django.middleware.csrf.CsrfViewMiddleware` in `settings.py`.
+    * [Django CSRF Reference](https://docs.djangoproject.com/en/3.0/ref/csrf/)
+
+## Open Redirects
+
+* Check for HTTP 3xx (redirections) where you have direct or implicit control over where the user gets redirected.
+    * This can be mitigated by whitelisting/hardcoding where the user should be redirected to.
+
+## Business Logic Bugs
+
+* Look for dynamic behavior where you control the input.
+* Data concatenation in URLs can be problematic -> SSRF and/or open redirects.
+* Data concatenation for functionalities that could possibly involve shell commands -> Remote code execution.
+* Data transactions where controlling the state of sensitive information can be maipulated via **race conditions**. Banking transactions are a good example: you might be able to make two purchases by only paying once!
+* Data serialization with `Pickle`, you can identify base64-encoded pickled data because it will be prefixed with `gASVNAAAA` -> Remote code execution.

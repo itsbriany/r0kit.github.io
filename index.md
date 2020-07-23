@@ -10,3 +10,4 @@
     * [IDORF Hunting](./bug-hunting/idorf.html)
     * [Open Redirect Hunting](./bug-hunting/open-redirect.html)
     * [Rate Limiting Hunting](./bug-hunting/rate-limiting.html)
+    * [Android](./bug-hunting/android.html)

@@ -1,0 +1,136 @@
+# Android
+
+* Always decompile the app. You can use `apktool` to do this.
+* Search the `AndroidManifest.xml` for sensitive information.
+* Search for xml strings such as `res/values/strings.xml` for sensistive information.
+* Search for database files. They will normally be sqlite3. 
+
+
+## Getting the APKs
+
+* Search the APK on your with `adb shell pm list packages`.
+* Get the path to the apk with `adb shell pm path [package value from previous command]`
+* Get the APK with `adb pull [path from previous command]`.
+
+## Installing a trusted CA on your device
+
+* You will need to root your device to do this. If you are using an emulator, you should get one that does **not** have the Google Play Store installed!
+* You will also want to get an emulator/device with Android < 29 so that you can temporarily make `/system` temporarily writeable without many issues.
+* Start the emulator with a writeable system mount: `.\emulator.exe -avd $deviceName -writable-system`
+* Run the following to make `/system` writeable:
+```bash
+adb root
+adb disable-verity
+adb reboot
+adb root
+adb remount
+adb shell mount -o rw,remount /
+```
+* https://docs.mitmproxy.org/stable/howto-install-system-trusted-ca-android/
+
+Then, to intercept traffic, depending on the UI, you might have to click and hold the network preferences in the wifi settings.
+
+Alternatively, you can take a look into Magisk if you want to bypass any sort of rooting detection. Also, you will likely only want to install Magisk on a real device since rooting can be detected on most emulators.
+
+## Network Attacks
+
+* MiTM is very common where the client does not verify the CA of the endpoint. You can try modifying the hosts file of your system to point to an SSL server you control to test this.
+* You can redirect DNS by changing the `hosts` file on your host running the emulator and point it to your DNS server to redirect the client. You should be able to specify the DNS server with the android emulator command line option `-dns-server <server list>`.
+
+## Application Attacks
+
+### Methodology
+
+* Identfy any views that hold sensistive information.
+* Identify whether the app uses any browser views which is useful for determining whether the target could be vulnerable to Cross-App scripting.
+* Identify where/if OAuth is being used. There might be opportunities for redirection hijacking and implicit grants. 
+* Inspect the `AndroidManifest.xml` for any dynamic deeplinks. If so, identify whether any browser-views are being rendered.
+* Identify any broadcasts the app makes. Do they broadcast sensitive information?
+* Search for secret keys in the `AndroidManifest.xml`, `res/values/strings.xml` and source code. If so, how could an attacker abuse them?
+* Search for activities with the `export` attribute in the `AndroidManifest.xml` file.
+* Search for permissions in the `AndroidManifest.xml` file and look for possible typos.
+* Search for any places where the app can write data from user-provided input which could result in overwriting sensitive files.
+* Search for any places where the app unzips data from user-provided input which could result in overwriting sensitive files.
+
+### Cross-App Scripting
+
+* Check for deeplinks that result in having arbitrary URLs opened in a built-in-browser activity. This could either lead to open redirects, or loading arbitrary JavaScript from a foreign domain. You can identify dynamic deeplinks in the `AndroidManifest.xml`.
+* HackerOne report #401793 is a good example where a deeplink into the application (via an intent filter) allows an attacker to laod artibrary content into the WebView.
+* Countermeasures:
+    * Ensure that URLs are whitelisted and/or very strictly filtered.
+    * Any data passed to `evaluateJavascript` should be hard-coded.
+
+### Attacking Intent Redirection
+
+* When an intent reaches an activity, it might be forwarded to another target. If the target doesn't validate the data properly, it might trigger an internal, unprotected activity.
+* Look for intents coming from `getExtras()` and see where they are going.
+* Basically, you might be able to open a sensitive Activity (i.e. a view-controller) in Android that you were not intended to.
+* Countermeasures:
+    * Validated any incoming intents and never send them directly to `startActivity()`.
+
+### Attacking Intent Broadcasting
+
+* If you see a `sendBroadcast` call for an intent without a specified class of component, you might be able to intercept any data that is sent out.
+* The impact is that any application on the device will view this broadcast and will be able to intercept it.
+* Countermeasures:
+    * Never broadcast sensistive information.
+    * When the target is known, use `setClass/setClassName/setComponent` to ensure the broadcast only goes to the specified target/s.
+
+### Attacking Unprotected Activities
+
+* Publicly exported activities can be **directly triggered** by other applications.
+    * There can be side effects to triggering unexpected activities. For example, app A used app B's exported activity. The triggering of app B's exported activity resulted in the deletion/modification of the user's account for app B.
+* Search for activities in the `AndroidManifest.xml` that have intent filters with the `exported=true` attribute.
+* Countermeasures
+    * Ensure that exported activities are purely intended to be directly used from outside the app (i.e. external input will not affect sensitive data).
+    * Don't export activities.
+
+### Attacking Custom Permission Types
+
+* HackerOne report #440749 is a good example for this.
+* Make sure that defined permissions are actually **used**.
+* Make sure you have spelled the permissions **exactly** how you did elsewhere.
+* Impact:
+    * Third party apps can perform unauthorized actions.
+
+### Path Traversal
+
+* If the path isn't validated, the app could write to any file on the system to where the app has permission to.
+* Check for anything that can write to a file on the system like calls to the `FileWriter` APIs.
+* Check for functionality that unzips files. When unzipping, a directory is taken and all specified contents are unzipped to that directory. Use the zipslip technique to achieve directory traversal to overwrite critical files to which the application has permission to.
+* Countermeasures:
+    * Avoid using external input for constructing paths.
+    * Prefer hashing file contents to produce filenames.
+    * Remove any slashes or backslashes to prevent path manipulation.
+    * Validate any paths coming from zip files before being used for path construction.
+
+### Embedded Secrets
+
+* Look for symmetric crypto keys, private keys, and HMAC keys.
+* Determine what the secret is being used for, and find documentation on the service. Check for ways in which you can abuse that secret.
+    * E.g. an overly permissive API key.
+    * Accessing sensitive data.
+
+### OAuth Implicit Grants
+
+* Normally found in single-page apps. The browser will make a request like `https://site/auth?client_id=...&redirect_url=com.myapp.oauth&response_type=token&scope=all`. In this case, the `token` response type will return the OAuth token in the response which can be prone to interception.
+* Countermeasures:
+    * Use the OAuth authorization flow via `response_type=code`.
+    * Consider using platform-integrated authorization systems like Google Sign-In and Facebook Login.
+
+### OAuth Redirect Hijacking
+
+* If the `redirect_url` or `redirect_uri` in the OAuth request is controlled by the attacker, then they could redirect to another intent (potentially in another app) and intercept your OAuth token.
+* Countermeasures:
+    * Hardcode the `redirect_url` and validate good known values on the server-side.
+    * Prefer using platform-integrated authentication systems to direct authentication responsibility to a trusted provider.
+
+## Reverse Engineering Pro-Guarded Apps
+
+### Mapping Resources
+
+* There is a 1-1 mapping between the resources in the `AndroidManifest.xml` file and the resources used by the app. The resources will be likely be in hex format in the `res/values/public.xml` file, but you will likely need to convert those values to decimal if you wish to search for them in the decompiled code.
+
+### Dynamic Instrumentation
+
+* Use dynamic instrumentation to bypass certificate pinning. This is because certificate pinning will still prevent the device from trusting your MiTM proxy at the application layer. Frida can make certificate pinning functions behave exactly how you want them to.

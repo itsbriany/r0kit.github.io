@@ -32,6 +32,16 @@ Then, to intercept traffic, depending on the UI, you might have to click and hol
 
 Alternatively, you can take a look into Magisk if you want to bypass any sort of rooting detection. Also, you will likely only want to install Magisk on a real device since rooting can be detected on most emulators.
 
+## Getting the APKs
+
+* Since 2018, APKs come bundled as multiple APKs and it is preferred to download the APK bundle directly from the Google Play Store. Therefore, I like to use [gplaycli](https://github.com/matlink/gplaycli) which only happens to work on Linux as of July 23, 2020. This makes the streamlined APK install process much smoother.
+
+## Running the Emulator
+
+```powershell
+.\emulator.exe -avd Pixel_2_XL_API_27 -dns-server [your-dns-server] -writable-system
+```
+
 ## Network Attacks
 
 * MiTM is very common where the client does not verify the CA of the endpoint. You can try modifying the hosts file of your system to point to an SSL server you control to test this.
@@ -133,4 +143,5 @@ Alternatively, you can take a look into Magisk if you want to bypass any sort of
 
 ### Dynamic Instrumentation
 
-* Use dynamic instrumentation to bypass certificate pinning. This is because certificate pinning will still prevent the device from trusting your MiTM proxy at the application layer. Frida can make certificate pinning functions behave exactly how you want them to.
+* Use dynamic instrumentation to bypass certificate pinning. This is because certificate pinning will still prevent the device from trusting your MiTM proxy at the application layer. Frida can make certificate pinning functions behave exactly how you want them to. Bear in mind that some apps will spawn a browser as a child process from the app that had the v8 engine injected into it, so dynamic instrumentation to achieve a certificate pinning bypass may prevent the browser from functioning properly. In that case, just capture the web requests and run them in a browser outside of the emulator/device.
+

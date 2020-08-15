@@ -11,3 +11,7 @@
     * [Open Redirect Hunting](./bug-hunting/open-redirect.html)
     * [Rate Limiting Hunting](./bug-hunting/rate-limiting.html)
     * [Android](./bug-hunting/android.html)
+
+# Hack The Box Writeups
+
+* [Shocker](./htb/shocker.html)

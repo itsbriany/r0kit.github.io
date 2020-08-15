@@ -14,5 +14,5 @@
 
 # Hack The Box Writeups
 
-* [My YouTube Channel](https://www.youtube.com/channel/UCjjPQZM-DNqCNbcLkFkYprQ/videos)
+* [My YouTube Channel](https://www.youtube.com/channel/UCjjPQZM-DNqCNbcLkFkYprQ/videos) -> Don't forget to subscribe! ;)
 * [Shocker](./htb/shocker.html)

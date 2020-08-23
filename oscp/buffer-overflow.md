@@ -15,15 +15,15 @@
 7. Check for bad characters from `0x00` - `0xff`. You can right-click on ESP and select *Follow in Dump* to show the input buffer of hex characters in memory. Check how buffer of bad characters got modified.
 8. Encode your shellcode so that it doesn't contain any bad characters.
 9. Search for a JMP ESP gadget. This gadget must comply with the following criteria:
-  a. It does not come from a library compiled with ASLR support.
-  b. The address does not contain any bad characters.
-  c. ADVANCED TIP: If the module was compiled with DEP support, the JMP ESP needs to be located in the .text code segment of the module with both Read (R) and Executable (E) permissions.
+  * It does not come from a library compiled with ASLR support.
+  * The address does not contain any bad characters.
+  * ADVANCED TIP: If the module was compiled with DEP support, the JMP ESP needs to be located in the .text code segment of the module with both Read (R) and Executable (E) permissions.
 10. You will need the opcode for the gadget. You should be able to achieve so with pwntools or metasploit's `nasm_shell`.
 11. Use the address of the new found gadget to redirect execution back into your shellcode. Generally speaking, this works by JMP'ing ESP to your shellcode since you previously overflowed ESP with your shellcode.
-  a. Make sure that the EIP address is in little endian so that the CPU can interpret the opcode correctly!
+  * Make sure that the EIP address is in little endian so that the CPU can interpret the opcode correctly!
 12. Generate the shellcode with msfvenom.
-  a. Certain shellcode encodings like shikata_ga_nai require some NOP padding to function because they require some additional space to extract itself, so don't forget to add the NOP sled!
-  b. The default exit behavior of msfvenom shellcode is ExitProcess. If you want the process to stay alive after you lose your shell, you want to set the exit function to ExitThread.
+  * Certain shellcode encodings like shikata_ga_nai require some NOP padding to function because they require some additional space to extract itself, so don't forget to add the NOP sled!
+  * The default exit behavior of msfvenom shellcode is ExitProcess. If you want the process to stay alive after you lose your shell, you want to set the exit function to ExitThread.
 13. Setup a netcat listener and pwn!
 
 ## Starting windows services

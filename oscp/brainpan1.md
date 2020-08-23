@@ -250,12 +250,6 @@ _|_|_|    _|          _|_|_|  _|  _|    _|  _|_|_|      _|_|_|  _|    _|
 
 As much as I like it when programs grant me access, I wasn't able to do much else after getting access since I wasn't able to enter any commands. I figured I would try doing some more analysis on the binary.
 
-I went ahead and moved the binary to my reverse-engineering machine and disabled ASLR to make debugging and exploit development a lot easier.
-
-```powershell
-New-ItemProperty -Path "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages" -Value 0
-```
-
 ## Exploit Development
 
 I then loaded the executable in Immunity Debugger and attempted to overflow it with a pattern. I used `pwntools` to generate the following 2000 byte pattern:

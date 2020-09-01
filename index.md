@@ -2,11 +2,11 @@
 
 * [Buffer Overflows](./oscp/buffer-overflow.html)
 * [Brainpan Level 1 (More Buffer Overflows)](./oscp/brainpan1.html)
+* [MySQL Injection Cheatsheet](./web/mysqlinjection.html)
 
 ## Web
 
 * [Web Hacking](./web/web.html)
-    * [MySQL Injection Cheatsheet](./web/mysqlinjection.html)
     * [Hacking Django Apps](./web/django.html)
     * [Local and Remote File Inclusions (LFI/RFI)](./web/lfi.html)
 
@@ -27,3 +27,11 @@
 ### Easy Machines
 
 * [Shocker](./htb/shocker.html)
+    * User Own -> Shellshock CVE on Apache mod_cgi
+    * Root Own -> sudo permission abuse
+
+### Medium Machines
+
+* [October](./htb/october.html)
+    * User Own -> CMS Enumeration + CVE
+    * Root Own -> Buffer overflow with ASLR enabled

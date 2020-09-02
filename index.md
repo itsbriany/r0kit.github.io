@@ -2,6 +2,7 @@
 
 * [Buffer Overflows](./oscp/buffer-overflow.html)
 * [Brainpan Level 1 (More Buffer Overflows)](./oscp/brainpan1.html)
+* [Metasploitable3 Windows Server 2008 R2](./oscp/metasploitable3-win2k8.html)
 * [MySQL Injection Cheatsheet](./web/mysqlinjection.html)
 
 ## Web

@@ -36,3 +36,6 @@
 * [October](./htb/october.html)
     * User Own -> CMS Enumeration + CVE
     * Root Own -> Buffer overflow with ASLR enabled
+* [Bastard](./htb/bastard.html)
+    * User Own -> Drupal CVE
+    * Root Own -> Juicy Potato

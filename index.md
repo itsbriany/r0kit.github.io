@@ -30,6 +30,9 @@
 * [Shocker](./htb/shocker.html)
     * User Own -> Shellshock CVE on Apache mod_cgi
     * Root Own -> sudo permission abuse
+* [Grandpa](./htb/grandpa.html)
+    * Foothold      -> CVE-2017-7269
+    * User/root own -> MS09-012
 
 ### Medium Machines
 

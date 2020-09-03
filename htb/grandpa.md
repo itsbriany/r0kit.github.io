@@ -1,6 +1,10 @@
-# Grandpa
+# Grandpa/Granny
 
 ![](./images/grandpa.png)
+![](./images/granny.png)
+
+Please note that the exploitation process for both the granny and grandpa machines is pretty much identical.
+This writeup will only cover the steps to gain SYSTEM level access on the grandpa machine, but you can reproduce the same steps to get the same SYSTEM level access on the granny machine.
 
 #### Machine release date: April 12, 2017
 

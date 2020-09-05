@@ -30,9 +30,12 @@
 * [Shocker](./htb/shocker.html)
     * User Own -> Shellshock CVE on Apache mod_cgi
     * Root Own -> sudo permission abuse
-* [Grandpa](./htb/grandpa.html)
+* [Grandpa/Granny](./htb/grandpa.html)
     * Foothold      -> CVE-2017-7269
     * User/root own -> MS09-012
+* [Bastion](./htb/bastion.html)
+    * User own -> SMB enumeration + SAM/SYSTEM registry dump
+    * Root own -> Sensitive information disclosed in outdated third party software
 
 ### Medium Machines
 

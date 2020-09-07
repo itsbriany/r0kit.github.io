@@ -36,6 +36,9 @@
 * [Bastion](./htb/bastion.html)
     * User own -> SMB enumeration + SAM/SYSTEM registry dump
     * Root own -> Sensitive information disclosed in outdated third party software
+* [Beep](./htb/beep.html)
+    * User own -> Elastix 2.2.0 - 'graph.php' Local File Inclusion
+    * Root own -> Credential Reuse
 
 ### Medium Machines
 

@@ -45,3 +45,6 @@
 * [Bastard](./htb/bastard.html)
     * User Own -> Drupal CVE
     * Root Own -> Juicy Potato
+* [Popcorn](./htb/popcorn.html)
+    * User Own -> File Upload MIME filter bypass
+    * Root Own -> Outdated Linux Kernel -> Dirty Cow - CVE-2016-5195, Non-default artifacts left in user's directory -> CVE-2010-0832

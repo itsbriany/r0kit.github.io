@@ -39,6 +39,9 @@
 * [Beep](./htb/beep.html)
     * User own -> Elastix 2.2.0 - 'graph.php' Local File Inclusion
     * Root own -> Credential Reuse
+* [Nibbles](./htb/nibbles.html)
+    * User own -> Weak Credential Guessing + CVE-2015-6967
+    * Root own -> Arbitrary Sudo Without Password
 
 ### Medium Machines
 

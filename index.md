@@ -42,6 +42,9 @@
 * [Nibbles](./htb/nibbles.html)
     * User own -> Weak Credential Guessing + CVE-2015-6967
     * Root own -> Arbitrary Sudo Without Password
+* [Netmon](./htb/netmon.html)
+    * User own -> Mounted C:\ Drive w/Anonymous Access
+    * Root own -> Sensitive Information Disclosure + CVE-2018-9276
 
 ### Medium Machines
 

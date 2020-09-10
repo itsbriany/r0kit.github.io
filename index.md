@@ -45,6 +45,9 @@
 * [Netmon](./htb/netmon.html)
     * User own -> Mounted C:\ Drive w/Anonymous Access
     * Root own -> Sensitive Information Disclosure + CVE-2018-9276
+* [Forest](./htb/forest.html)
+    * User own -> AS-REP Roast Attack
+    * Root own -> Implicit Permissions to Domain Admin via Exchange Windows Permissions
 
 ### Medium Machines
 

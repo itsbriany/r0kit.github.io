@@ -48,6 +48,9 @@
 * [Forest](./htb/forest.html)
     * User own -> AS-REP Roast Attack
     * Root own -> Implicit Permissions to Domain Admin via Exchange Windows Permissions
+* [Active](./htb/active.html)
+    * User Own -> Sensitive Groups.xml leaked from SYSVOL Replication
+    * Root Own -> Kerberoasting the Service Account
 
 ### Medium Machines
 

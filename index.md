@@ -4,6 +4,9 @@
 * [Brainpan Level 1 (More Buffer Overflows)](./oscp/brainpan1.html)
 * [Metasploitable3 Windows Server 2008 R2](./oscp/metasploitable3-win2k8.html)
 * [MySQL Injection Cheatsheet](./web/mysqlinjection.html)
+* [OSCP Voucher Box](./oscp/oscp.html)
+    * User Own -> Leaked user and private SSH key
+    * Root Own -> Abusing Linux lxd group
 
 ## Web
 

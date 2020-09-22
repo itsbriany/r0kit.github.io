@@ -58,6 +58,9 @@
     * Foothold -> CVE-2010-2075
     * User Own -> World Readable Password Hint
     * Root Own -> Abusing Arbitrary Commands Invoked by SUID Binaries
+* [Valentine](./htb/valentine.html)
+    * User Own -> Sensitive Information Disclosure + Heartbleed (CVE-2014-0160)
+    * Root Own -> Tmux Session Hijacking
 
 ### Medium Machines
 

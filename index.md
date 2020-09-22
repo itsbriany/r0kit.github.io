@@ -54,6 +54,10 @@
 * [Active](./htb/active.html)
     * User Own -> Sensitive Groups.xml leaked from SYSVOL Replication
     * Root Own -> Kerberoasting the Service Account
+* [Irked](./htb/irked.html)
+    * Foothold -> CVE-2010-2075
+    * User Own -> World Readable Password Hint
+    * Root Own -> Abusing Arbitrary Commands Invoked by SUID Binaries
 
 ### Medium Machines
 

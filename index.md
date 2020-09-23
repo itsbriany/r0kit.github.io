@@ -76,3 +76,6 @@
 * [Jeeves](./htb/jeeves.html)
     * User Own -> Web brute forcing + Jenkins Script Console RCE (Windows)
     * Root Own -> Juicy Potato/Sensitive Information Disclosure + Alternate Data Streams
+* [Poison](./htb/poison.html)
+    * User Own -> Sensitive Information Disclosure and Log Poisoning via PHP LFI Vulnerability
+    * Root Own -> Sensitive Information Disclosure + Root VNC Session Hijacking

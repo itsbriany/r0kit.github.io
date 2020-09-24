@@ -83,3 +83,6 @@
     * Foothold -> WebShell written via MySQL injection/Weak MySQL Password + CVE-2018-12613
     * User Own -> Restricted Sudo - OS Command Injection Filter Bypass
     * Root Own -> Remote Code Execution via SUID Binary
+* [Cronos](./htb/cronos.html)
+    * User Own -> DNS Zone Transfer + SQL Injection Authentication Bypass + OS Command Injection
+    * Root Own -> Cronjob Running Writeable Script by Low-Privileged User

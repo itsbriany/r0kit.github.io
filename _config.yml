@@ -51,6 +51,18 @@ author:
     - label: "Twitter"
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/r0kithax"
+    - label: "LinkedIn"
+      icon: "fab fa-linkedin"
+      url: "https://linkedin.com/r0kit"
+    - label: "YouTube"
+      icon: "fab fa-youtube"
+      url: "https://www.youtube.com/channel/UCjjPQZM-DNqCNbcLkFkYprQ/videos"
+    - label: "Discord"
+      icon: "fab fa-discord"
+      url: "https://discord.gg/wbPXa9B"
+    - label: "Medium"
+      icon: "fab fa-medium"
+      url: "https://medium.com/@r0kit"
 
 footer:
   links:

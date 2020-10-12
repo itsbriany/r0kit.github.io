@@ -116,12 +116,6 @@ At 40 bytes into the stack buffer overflow, we can set value in the RIP address 
 
 ## Verify Control Over RIP
 
-Build a payload.
-Flush out the program's buffers before sending it any data.
-Pwn it.
-Wait for it to crash.
-Analyze it in GDB.
-
 Let's verify that we took control over the RIP register by debugging the program in GDB.
 In the exploit code below, we can set 40 bytes of padding followed by the 64-bit little-endian value to overwrite the RIP register.
 Then, we flish all the program's output buffers so that we know it will be ready to read our payload, and then we send it and wait for the app to crash at 0xdeadbeef.

@@ -7,6 +7,7 @@ categories:
   - ctf
   - infosec
 tags:
+  - binary exploitation
   - exploit development
   - defeating non-executable stacks
   - rop chaining

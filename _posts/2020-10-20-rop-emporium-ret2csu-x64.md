@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "ROP Emporium - Ret2csu (x64)"
-date:   2020-10-17
+date:   2020-10-20
 excerpt: "ret2csu was a tough challenge from the rop emporium that required the pwner to call an imported function with three arguments in a tiny executable. The caveat was that there was no obvious gadget to set the third argument. Therefore, the pwner had to return to the `__libc_csu_init` function to set the RDX register with a mov instruction. As much as this works in practice, it also has numerous side effects that require comensation to get the final exploit to work."
 categories:
   - ctf

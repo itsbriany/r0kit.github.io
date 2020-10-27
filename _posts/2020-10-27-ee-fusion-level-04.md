@@ -2,7 +2,7 @@
 layout: single
 title:  "Exploit Excercises - Fusion Level 4"
 date:   2020-10-27
-excerpt: ""
+excerpt: "Fusion Level 04 was a tough challenge from exploit excercises that required the pwner to implement a timing attack and defeat modern countermeasures implemented by the compiler (stack canary, PIE, and non-executable stack) and operating system (ASLR). This was the most realistic binary exploitation challenge I have done yet which proves that in certain circumstances, buffer overflows are still exploitable today."
 categories:
   - ctf
   - infosec
@@ -17,7 +17,7 @@ tags:
 
 ## Summary
 
-Fusion Level 04 was a tough challenge from exploit excercises that required the pwner to implement a timing attack and defeat modern countermeasures implemented by the compiler (stack canary, PIE, and non-executable stack) and operating system (ASLR). This was the most realistic binary exploitation challenge I have done yet which proves that in certain applications, buffer overflows are still exploitable today. You can read more on the challenge [here](http://exploit-exercises.lains.space/fusion/level04/).
+Fusion Level 04 was a tough challenge from exploit excercises that required the pwner to implement a timing attack and defeat modern countermeasures implemented by the compiler (stack canary, PIE, and non-executable stack) and operating system (ASLR). This was the most realistic binary exploitation challenge I have done yet which proves that in certain circumstances, buffer overflows are still exploitable today. You can read more on the challenge [here](http://exploit-exercises.lains.space/fusion/level04/).
 
 ## Analyze the Countermeasures
 

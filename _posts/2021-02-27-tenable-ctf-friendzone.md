@@ -19,10 +19,10 @@ tags:
 
 The friendzone was the 250 point pwn challenge from Tenable CTF 2021 which involved finding an obscure vulnerability in C++ code. The challenge required the pwner to bypass auhtorization countermeasures to read a VIP's profile. Solving this challenge is proof that buffer overflow vulnerabilities are still applicable in hardened C++ apps and that one does not necessarily need to achieve remote execution to take control over the business logic of an application.
 
-If this blog post is too long, you can check out my YouTube video here where I walk through the same content here step-by-step.
+If this blog post is too long, you can check out my [YouTube video](https://youtu.be/DZDRyf_f8XM) where I walk through the same content here step-by-step.
 Now, let's get to the challenge!
 
-You can also access the source code for this challenge on my [GitHub]()
+You can also access the source code for this challenge on my [GitHub](https://github.com/r0kit/Tenable-CTF-2021---Friendzone).
 
 ### Accessing the Source Code
 
